@@ -273,8 +273,53 @@ Posteriormente se incluye la librería <xc.h> para acceder a los registros inter
 
 Estas configuraciones permiten preparar el sistema para trabajar con comunicación serial I2C y mostrar información en una pantalla LCD.
 */
+void main(void) {
+    // Configuración del oscilador interno (ejemplo para 16MHz o según tus fuses)
+    OSCCON = 0x70; 
+    
+    // Inicializar los módulos
+    I2C_init();
+    lcd_init();
+    
+    // 1. TEXTO ESTÁTICO
+    lcd_clear();
+    lcd_set_cursor(0, 0);
+    lcd_write_string("  ECCI  LAB07   ");
+    lcd_set_cursor(1, 0);
+    lcd_write_string("I2C con PIC18F  ");
+    __delay_ms(3000);
+    
+    // 2. CARACTERES ESPECIALES (Ejemplo: Ícono de Corazón)
+    // Crear el carácter en la CGRAM (dirección 0)
+    unsigned char corazon[8] = {0x00, 0x0A, 0x1F, 0x1F, 0x0E, 0x04, 0x00, 0x00};
+    lcd_cmd(0x40); // Dirección de inicio de CGRAM para el carácter 0
+    for(int i=0; i<8; i++) {
+        lcd_write_char(corazon[i]);
+    }
+    
+    // Mostrar el carácter creado
+    lcd_clear();
+    lcd_set_cursor(0, 0);
+    lcd_write_string("Custom Char: ");
+    lcd_write_char(0); // Imprime el carácter personalizado 0
+    __delay_ms(3000);
+    
+    // 3. DESPLAZAMIENTO DE STRING (Marquesina)
+    lcd_clear();
+    lcd_set_cursor(0, 0);
+    lcd_write_string("Desplazando... ");
+    
+    while(1) {
+        // Comando 0x18 desplaza toda la pantalla a la izquierda
+        lcd_cmd(0x18); 
+        __delay_ms(4000);
+    }
+}
 
 ## Diagramas
+
+![Circuito LCD e I2C](WhatsApp Image 2026-05-08 at 7.16.16 PM.jpeg)
+
 
 ## Evidencias de implementación
 
@@ -315,3 +360,8 @@ El uso de I2C facilitó el diseño del sistema al reducir la cantidad de pines n
 
 
 ## Referencias
+
+* **[1]** Microchip Technology Inc., "PIC18(L)F2X/4XK22 Data Sheet," Chandler, AZ, USA, Doc. Pages 241-260, 2010.
+* **[2]** NXP Semiconductors, "PCF8574; PCF8574A Remote 8-bit I/O expander for I2C-bus," Eindhoven, The Netherlands, Rev. 5, 2013.
+* **[3]** NXP Semiconductors, "UM10204: I2C-bus specification and user manual," Rev. 7.0, 2021.
+* **[4]** M. A. Mazidi, R. D. McKinlay y D. Causey, *PIC Microcontroller and Embedded Systems: Using Assembly and C for PIC18*, 1.ª ed. Paramus, NJ, USA: Prentice Hall, 2007.
